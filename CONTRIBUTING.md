@@ -1,8 +1,6 @@
 # Recommended Coding Guidelines
 
-## IDE Setup
-
-# IDE Choice
+# IDE
 
 - It is recommended to use `Intellij RustRover`
 
