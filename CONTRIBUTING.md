@@ -80,3 +80,25 @@ Change to include the error message inside its string variable:
 VerifyConnection(String),
 ```
 
+# General Team Way of Work (WoW)
+
+## User Stories
+
+Captire requirements using "User Story" format:
+
+```
+As a..., I want to..., So that ...
+```
+
+E.g.
+
+```
+As a DeFi user, I want to stake my Hehe token, So that I can accumulate 7% staking APY.
+```
+
+## Iterative Approach
+
+- Do not go too deep on one story, rather iterate by first introducing essential functionalities
+  and then adding other things. For example, subscription ability first, then adding fault-tolerant behaviour
+
+
