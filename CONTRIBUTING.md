@@ -51,6 +51,9 @@ Then
   yourself.
 - PR review should not focus on formatting, this should be taken care of via agreed-upon automatic formatting in
   dev's local machine
+- PRs messages can follow a standard set of guidelines. For example, use of the words `feature`, `chore`, etc. better
+  clarifies the intent of the PR.
+  see [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
 
 ## Cargo.toml
 
