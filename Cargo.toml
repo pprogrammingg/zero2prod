@@ -25,3 +25,15 @@ reqwest = "0.12"
 # The feature is not enabled by default to avoid pulling in
 # unnecessary dependencies for projects that do not need it.
 serde = { version = "1.0", features = ["derive"] }
+
+# Using table-like toml syntax to avoid a super-long line!
+[dependencies.sqlx]
+version = "0.8"
+default-features = false
+features = [
+    "runtime-tokio-rustls", "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate"
+]
