@@ -10,6 +10,6 @@ pub struct FormData {
 }
 
 // Let's start simple: we always return a 200 OK
-pub async fn subscribe(form: web::Form<FormData>) -> HttpResponse {
+pub async fn subscribe(_form: web::Form<FormData>) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
