@@ -131,4 +131,4 @@ jobs:
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
       - name: Generate code coverage
-        run: cargo install cargo-tarpaulin && cargo tarpaulin --verbose --workspace    - 5432:5432
+        run: cargo install cargo-tarpaulin && cargo tarpaulin --verbose --workspace
