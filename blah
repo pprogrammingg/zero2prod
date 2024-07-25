@@ -1,0 +1,3 @@
+# for sqlx compilation purposes
+DATABASE_URL="postgres://postgres:password@localhost:5432/newsletter"
+
