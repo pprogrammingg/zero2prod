@@ -30,7 +30,7 @@ async fn health_check_works() {
     // Arrange
     let TestApp {
         address,
-        db_pool: _db_pool,
+        db_pool: _,
     } = spawn_app().await;
 
     // We need to bring in `reqwest`
@@ -54,17 +54,8 @@ async fn subscribe_returns_a200_for_valid_form_data() {
     // Arrange
     let TestApp {
         address,
-        db_pool: _db_pool,
+        db_pool: db_pool,
     } = spawn_app().await;
-    let configuration = get_configuration().expect("Failed to read configuration");
-    let connection_string = configuration
-        .database
-        .connection_string();
-    // The `Connection` trait MUST be in scope for us to invoke
-    // `PgConnection::connect` - it is not an inherent method of the struct!
-    let mut connection = PgConnection::connect(&connection_string)
-        .await
-        .expect("Failed to connect to Postgres.");
 
     let client = reqwest::Client::new();
 
@@ -83,7 +74,7 @@ async fn subscribe_returns_a200_for_valid_form_data() {
     assert_eq!(200, response.status().as_u16());
 
     let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
-        .fetch_one(&mut connection)
+        .fetch_one(&db_pool)
         .await
         .expect("Failed to fetch saved subscription.");
 
@@ -127,16 +118,12 @@ async fn subscribe_returns_a400_when_data_is_missing() {
 }
 async fn spawn_app() -> TestApp {
     let mut configuration = get_configuration().expect("Failed to read configuration.");
-    //configuration.database;
-    // .database_name = Uuid::new_v4().to_string();
 
-    let db_pool = PgPool::connect(
-        &configuration
-            .database
-            .connection_string(),
-    )
-    .await
-    .expect("Failed to connect to Postgres."); //configure_database(&configuration.database).await;
+    configuration
+        .database
+        .database_name = Uuid::new_v4().to_string();
+
+    let db_pool = configure_database(&configuration.database).await;
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
 
@@ -173,17 +160,6 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .run(&connection_pool)
         .await
         .expect("Failed to migrate the database");
-
-    // Query to get the current database name
-    // let row: (String,) = sqlx::query_as("SELECT current_database()")
-    //     .fetch_one(&mut connection)
-    //     .await
-    //     .expect("failed to get database name");
-    //
-    // // The database name is in the first tuple element
-    // let db_name = row.0;
-    //
-    // println!("Connected to database: {}", db_name);
 
     connection_pool
 }
