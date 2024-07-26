@@ -13,6 +13,7 @@
 ```
 File -> Settings -> Rust -> External Linters, 
 select Clippy & enable "Run external linter on the fly"
+
 ```
 
 - Make warnings fail linting:
