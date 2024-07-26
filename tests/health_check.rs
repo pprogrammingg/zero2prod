@@ -3,12 +3,23 @@ use std::net::TcpListener;
 
 use sqlx::{
     Connection,
+    Executor,
     PgConnection,
+    PgPool,
 };
+use uuid::Uuid;
 use zero2prod::{
-    configuration::get_configuration,
+    configuration::{
+        get_configuration,
+        DatabaseSettings,
+    },
     startup::run,
 };
+
+pub struct TestApp {
+    pub address: String,
+    pub db_pool: PgPool,
+}
 
 // `tokio::test` is the testing equivalent of `tokio::main`.
 // It also spares you from having to specify the `#[test]` attribute. //
@@ -17,7 +28,10 @@ use zero2prod::{
 #[tokio::test]
 async fn health_check_works() {
     // Arrange
-    let address = spawn_app();
+    let TestApp {
+        address,
+        db_pool: _db_pool,
+    } = spawn_app().await;
 
     // We need to bring in `reqwest`
     // to perform HTTP requests against our application.
@@ -38,7 +52,10 @@ async fn health_check_works() {
 #[tokio::test]
 async fn subscribe_returns_a200_for_valid_form_data() {
     // Arrange
-    let address = spawn_app();
+    let TestApp {
+        address,
+        db_pool: _db_pool,
+    } = spawn_app().await;
     let configuration = get_configuration().expect("Failed to read configuration");
     let connection_string = configuration
         .database
@@ -70,13 +87,16 @@ async fn subscribe_returns_a200_for_valid_form_data() {
         .await
         .expect("Failed to fetch saved subscription.");
 
-    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
-    assert_eq!(saved.name, "le guin");
+    assert_eq!(saved.email, "pprog@gmail.com");
+    assert_eq!(saved.name, "de Pprog");
 }
 #[tokio::test]
 async fn subscribe_returns_a400_when_data_is_missing() {
     // Arrange
-    let address = spawn_app();
+    let TestApp {
+        address,
+        db_pool: _db_pool,
+    } = spawn_app().await;
     let client = reqwest::Client::new();
 
     // Act
@@ -105,14 +125,47 @@ async fn subscribe_returns_a400_when_data_is_missing() {
         );
     }
 }
-fn spawn_app() -> String {
+async fn spawn_app() -> TestApp {
+    let mut configuration = get_configuration().expect("Failed to read configuration.");
+    configuration
+        .database
+        .database_name = Uuid::new_v4().to_string();
+
+    let db_pool = configure_database(&configuration.database).await;
+
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
+
     // We retrieve the port assigned to us by the OS
     let port = listener
         .local_addr()
         .unwrap()
         .port();
-    let server = run(listener).expect("Failed to bind address");
+    let server = run(listener, db_pool.clone()).expect("Failed to bind address");
     let _ = tokio::spawn(server);
-    format!("http://127.0.0.1:{}", port)
+    TestApp {
+        address: format!("http://127.0.0.1:{}", port),
+        db_pool,
+    }
+}
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    // Create database
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres");
+
+    connection
+        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .await
+        .expect("Failed to create database.");
+
+    // Migrate database
+    let connection_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to Postgres.");
+    sqlx::migrate!("./migrations")
+        .run(&connection_pool)
+        .await
+        .expect("Failed to migrate the database");
+    connection_pool
 }
