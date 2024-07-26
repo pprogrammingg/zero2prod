@@ -169,3 +169,5 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to migrate the database");
     connection_pool
 }
+// no clean up is performed intentially, if many empty dbs become a performance issue, we can simply
+// restart the db
