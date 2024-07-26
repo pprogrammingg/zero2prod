@@ -127,9 +127,8 @@ async fn subscribe_returns_a400_when_data_is_missing() {
 }
 async fn spawn_app() -> TestApp {
     let mut configuration = get_configuration().expect("Failed to read configuration.");
-    configuration
-        .database
-        .database_name = Uuid::new_v4().to_string();
+    //configuration.database;
+    // .database_name = Uuid::new_v4().to_string();
 
     let db_pool = PgPool::connect(
         &configuration
