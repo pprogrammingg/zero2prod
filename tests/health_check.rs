@@ -131,7 +131,13 @@ async fn spawn_app() -> TestApp {
         .database
         .database_name = Uuid::new_v4().to_string();
 
-    let db_pool = configure_database(&configuration.database).await;
+    let db_pool = PgPool::connect(
+        &configuration
+            .database
+            .connection_string(),
+    )
+    .await
+    .expect("Failed to connect to Postgres."); //configure_database(&configuration.database).await;
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
 
@@ -170,15 +176,15 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to migrate the database");
 
     // Query to get the current database name
-    let row: (String,) = sqlx::query_as("SELECT current_database()")
-        .fetch_one(&mut connection)
-        .await
-        .expect("failed to get database name");
-
-    // The database name is in the first tuple element
-    let db_name = row.0;
-
-    println!("Connected to database: {}", db_name);
+    // let row: (String,) = sqlx::query_as("SELECT current_database()")
+    //     .fetch_one(&mut connection)
+    //     .await
+    //     .expect("failed to get database name");
+    //
+    // // The database name is in the first tuple element
+    // let db_name = row.0;
+    //
+    // println!("Connected to database: {}", db_name);
 
     connection_pool
 }
