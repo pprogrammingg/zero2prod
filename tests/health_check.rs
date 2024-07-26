@@ -163,11 +163,24 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     let connection_pool = PgPool::connect(&config.connection_string())
         .await
         .expect("Failed to connect to Postgres.");
+
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await
         .expect("Failed to migrate the database");
+
+    // Query to get the current database name
+    let row: (String,) = sqlx::query_as("SELECT current_database()")
+        .fetch_one(&mut connection)
+        .await
+        .expect("failed to get database name");
+
+    // The database name is in the first tuple element
+    let db_name = row.0;
+
+    println!("Connected to database: {}", db_name);
+
     connection_pool
 }
-// no clean up is performed intentially, if many empty dbs become a performance issue, we can simply
-// restart the db
+// no clean up is performed intentionally, if many empty dbs become a performance issue, we can
+// simply restart the db
