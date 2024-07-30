@@ -52,10 +52,7 @@ async fn health_check_works() {
 #[tokio::test]
 async fn subscribe_returns_a200_for_valid_form_data() {
     // Arrange
-    let TestApp {
-        address,
-        db_pool: db_pool,
-    } = spawn_app().await;
+    let TestApp { address, db_pool } = spawn_app().await;
 
     let client = reqwest::Client::new();
 
@@ -133,7 +130,7 @@ async fn spawn_app() -> TestApp {
         .unwrap()
         .port();
     let server = run(listener, db_pool.clone()).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
+    tokio::spawn(server);
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
         db_pool,

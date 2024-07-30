@@ -1,0 +1,6 @@
+### Createa  subscriptip
+POST {{host}}/subscriptions
+Content-Type: application/x-www-form-urlencoded
+
+name = {{$random.alphabetic(8)}} &
+email = {{$random.email}}
