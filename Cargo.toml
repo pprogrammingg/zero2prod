@@ -20,8 +20,6 @@ name = "zero2prod"
 actix-web = "4.8"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 config = "0.14"
-env_logger = "0.11"
-log = "0.4"
 reqwest = "0.12"
 # We need the optional `derive` feature to use `serde`'s procedural macros:
 # `#[derive(Serialize)]` and `#[derive(Deserialize)]`.
