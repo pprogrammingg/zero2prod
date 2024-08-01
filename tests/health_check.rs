@@ -1,6 +1,8 @@
 //! tests/health_check.rs
 use std::net::TcpListener;
 
+use once_cell::sync::Lazy;
+use secrecy::ExposeSecret;
 use sqlx::{
     Connection,
     Executor,
@@ -14,7 +16,24 @@ use zero2prod::{
         DatabaseSettings,
     },
     startup::run,
+    telemetry::{
+        get_subscriber,
+        init_subscriber,
+    },
 };
+
+// Ensure that the `tracing` stack is only initialised once using `once_cell`
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let default_filter_level = "info".to_string();
+    let subscriber_name = "test".to_string();
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
+        init_subscriber(subscriber);
+    }
+});
 
 pub struct TestApp {
     pub address: String,
@@ -114,6 +133,10 @@ async fn subscribe_returns_a400_when_data_is_missing() {
     }
 }
 async fn spawn_app() -> TestApp {
+    // The first time `initialize` is invoked the code in `TRACING` is executed.
+    // All other invocations will instead skip execution.
+    Lazy::force(&TRACING);
+
     let mut configuration = get_configuration().expect("Failed to read configuration.");
 
     configuration
@@ -149,9 +172,13 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to create database.");
 
     // Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
-        .await
-        .expect("Failed to connect to Postgres.");
+    let connection_pool = PgPool::connect(
+        &config
+            .connection_string()
+            .expose_secret(),
+    )
+    .await
+    .expect("Failed to connect to Postgres.");
 
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
