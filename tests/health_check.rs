@@ -96,6 +96,45 @@ async fn subscribe_returns_a200_for_valid_form_data() {
     assert_eq!(saved.email, "pprog@gmail.com");
     assert_eq!(saved.name, "de Pprog");
 }
+
+#[tokio::test]
+async fn subscribe_returns_a_400_when_name_is_invalid() {
+    // Arrange
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+    let long_name = "A".repeat(257);
+
+    let long_name_email = format!("name={}&email=%40gmail.com", long_name);
+
+    let test_cases = vec![
+        (
+            "name=&email=ursula_le_guin%40gmail.com".to_owned(),
+            "empty name".to_owned(),
+        ),
+        (long_name_email, "name too long".to_owned()),
+        (
+            "name=U(o){&email=definitely-not-an-email".to_owned(),
+            "name has forbidden characters".to_owned(),
+        ),
+    ];
+    for (body, description) in test_cases {
+        // Act
+        let response = client
+            .post(&format!("{}/subscriptions", &app.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+        // Assert
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not return a 400 BAD REQUEST when the payload was {}.",
+            description
+        );
+    }
+}
 #[tokio::test]
 async fn subscribe_returns_a400_when_data_is_missing() {
     // Arrange
