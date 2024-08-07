@@ -42,7 +42,7 @@ where
         .with(formatting_layer)
 }
 
-/// Register a subscriber as global default to process span data. ///
+/// Register a subscriber as global default to process span data.
 /// It should only be called once!
 pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
     LogTracer::init().expect("Failed to set logger");

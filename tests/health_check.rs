@@ -98,7 +98,7 @@ async fn subscribe_returns_a200_for_valid_form_data() {
 }
 
 #[tokio::test]
-async fn subscribe_returns_a_400_when_name_is_invalid() {
+async fn subscribe_returns_a_400_when_name_email_is_invalid() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -115,6 +115,11 @@ async fn subscribe_returns_a_400_when_name_is_invalid() {
         (
             "name=U(o){&email=definitely-not-an-email".to_owned(),
             "name has forbidden characters".to_owned(),
+        ),
+        ("name=ursula&email=".to_owned(), "empty email".to_owned()),
+        (
+            "name=ursula&email=asdf".to_owned(),
+            "wrong formatted email".to_owned(),
         ),
     ];
     for (body, description) in test_cases {
