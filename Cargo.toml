@@ -23,7 +23,6 @@ claims = "0.7"
 config = "0.14"
 fake = "~2.3"
 once_cell = "1.19"
-reqwest = "0.12"
 quickcheck = "0.9"
 quickcheck_macros = "0.9"
 secrecy = { version = "0.8", features = ["serde"] }
@@ -42,6 +41,11 @@ tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 unicode-segmentation = "1"
 uuid = { version = "1.10", features = ["v4"] }
 validator = { version = "0.16" }
+
+[dependencies.reqwest]
+version = "0.12"
+default-features = false
+# We need the `json` feature flag to serialize/deserialize JSON payloads features = ["json", "rustls-tls"]
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
