@@ -9,22 +9,28 @@ use actix_web::{
 use sqlx::PgPool;
 use tracing_actix_web::TracingLogger;
 
-use crate::routes::{
-    health_check::health_check,
-    subscriptions::subscribe,
+use crate::{
+    email_client::EmailClient,
+    routes::{
+        health_check::health_check,
+        subscriptions::subscribe,
+    },
 };
 
-// Notice the different signature!
-// We return `Server` on the happy path and we dropped the `async` keyword
-// We have no .await call, so it is not needed anymore.
-pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Error> {
+pub fn run(
+    listener: TcpListener,
+    db_pool: PgPool,
+    email_client: EmailClient,
+) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);
+    let email_client = web::Data::new(email_client);
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
-            .app_data(db_pool.clone()) //used to hold state
+            .app_data(db_pool.clone())
+            .app_data(email_client.clone())
     })
     .listen(listener)?
     .run();
