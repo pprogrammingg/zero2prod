@@ -198,6 +198,9 @@ async fn spawn_app() -> TestApp {
             .email_client
             .base_url,
         sender_email,
+        configuration
+            .email_client
+            .authorization_token,
     );
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
