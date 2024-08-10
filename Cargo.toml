@@ -60,3 +60,6 @@ features = [
     "chrono",
     "migrate"
 ]
+
+[dev-dependencies]
+serde_json = "1"
