@@ -86,7 +86,10 @@ mod tests {
         Fake,
         Faker,
     };
-    use secrecy::Secret;
+    use secrecy::{
+        ExposeSecret,
+        Secret,
+    };
     use wiremock::{
         matchers::{
             header,
@@ -129,6 +132,15 @@ mod tests {
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
         let email_client = EmailClient::new(mock_server.uri(), sender, Secret::new(Faker.fake()));
         Mock::given(header("X-Requested-With", "XMLHttpRequest"))
+            .and(header(
+                "Authorization",
+                format!(
+                    "Bearer {}",
+                    email_client
+                        .authorization_token
+                        .expose_secret()
+                ),
+            ))
             .and(header("Content-Type", "application/json"))
             .and(path("/email"))
             .and(method("POST"))
