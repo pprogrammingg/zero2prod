@@ -83,6 +83,10 @@ VerifyConnection(String)
   client instance is used - even if `Client::clone()` is used, because `clone()` in this case just creates)
   a pointer to the underlying client.
 
+## Timeouts and IO Operation
+
+- Any time performing an IO operation, always set a timeout!
+
 ## CD Pipeline
 
 - try to use bare minimum images as the runtime for code
