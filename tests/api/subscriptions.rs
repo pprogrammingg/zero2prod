@@ -1,4 +1,7 @@
-use crate::helpers::spawn_app;
+use crate::helpers::{
+    spawn_app,
+    TestApp,
+};
 
 #[tokio::test]
 async fn subscribe_returns_a200_for_valid_form_data() {
