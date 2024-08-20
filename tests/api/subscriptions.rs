@@ -1,31 +1,22 @@
-use crate::helpers::{
-    spawn_app,
-    TestApp,
-};
+use crate::helpers::spawn_app;
 
 #[tokio::test]
 async fn subscribe_returns_a200_for_valid_form_data() {
     // Arrange
-    let TestApp { address, db_pool } = spawn_app().await;
-
-    let client = reqwest::Client::new();
+    let app = spawn_app().await;
 
     // Act
     let body = "name=de%20Pprog&email=pprog%40gmail.com";
 
-    let response = client
-        .post(&format!("{}/subscriptions", &address))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let response = app
+        .post_subscriptions(body.into())
+        .await;
 
     // Assert
     assert_eq!(200, response.status().as_u16());
 
     let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
-        .fetch_one(&db_pool)
+        .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch saved subscription.");
 
@@ -37,7 +28,6 @@ async fn subscribe_returns_a200_for_valid_form_data() {
 async fn subscribe_returns_a_400_when_name_email_is_invalid() {
     // Arrange
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
     let long_name = "A".repeat(257);
 
     let long_name_email = format!("name={}&email=%40gmail.com", long_name);
@@ -60,13 +50,9 @@ async fn subscribe_returns_a_400_when_name_email_is_invalid() {
     ];
     for (body, description) in test_cases {
         // Act
-        let response = client
-            .post(&format!("{}/subscriptions", &app.address))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(body)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+        let response = app
+            .post_subscriptions(body.into())
+            .await;
         // Assert
         assert_eq!(
             400,
@@ -79,11 +65,7 @@ async fn subscribe_returns_a_400_when_name_email_is_invalid() {
 #[tokio::test]
 async fn subscribe_returns_a400_when_data_is_missing() {
     // Arrange
-    let TestApp {
-        address,
-        db_pool: _db_pool,
-    } = spawn_app().await;
-    let client = reqwest::Client::new();
+    let app = spawn_app().await;
 
     // Act
     let test_cases = vec![
@@ -93,13 +75,9 @@ async fn subscribe_returns_a400_when_data_is_missing() {
     ];
     for (invalid_body, error_message) in test_cases {
         // Act
-        let response = client
-            .post(&format!("{}/subscriptions", &address))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(invalid_body)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+        let response = app
+            .post_subscriptions(invalid_body.into())
+            .await;
 
         // Assert
         assert_eq!(

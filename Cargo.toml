@@ -20,7 +20,7 @@ name = "zero2prod"
 actix-web = "4.8"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 claims = "0.7"
-config = "0.14"
+config = { git = "https://github.com/mehcode/config-rs", rev = "e3c1d0b" }
 fake = "~2.3"
 once_cell = "1.19"
 quickcheck = "0.9"
