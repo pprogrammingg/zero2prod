@@ -92,6 +92,11 @@ VerifyConnection(String)
 - try to use bare minimum images as the runtime for code
 - stage and separate dependency and core code build (core code in a repo changes more often than dependencies).
   Cache different stages of building, including dependencies.
+- Run Sqlx migration against remote DB:
+
+```bash
+DATABASE_URL=<REMOTE_DB_ADDRESS> sqlx migrate run
+```
 
 # General Team Way of Work (WoW) (sprints, user stories, etc.)
 
