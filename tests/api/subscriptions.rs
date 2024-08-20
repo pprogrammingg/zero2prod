@@ -1,3 +1,12 @@
+use wiremock::{
+    matchers::{
+        method,
+        path,
+    },
+    Mock,
+    ResponseTemplate,
+};
+
 use crate::helpers::spawn_app;
 
 #[tokio::test]
@@ -7,6 +16,12 @@ async fn subscribe_returns_a200_for_valid_form_data() {
 
     // Act
     let body = "name=de%20Pprog&email=pprog%40gmail.com";
+
+    Mock::given(path("/email"))
+        .and(method("POST"))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&app.email_server)
+        .await;
 
     let response = app
         .post_subscriptions(body.into())
@@ -88,4 +103,24 @@ async fn subscribe_returns_a400_when_data_is_missing() {
             error_message
         );
     }
+}
+
+#[tokio::test]
+async fn subscribe_sends_a_confirmation_email_for_valid_data() {
+    // Arrange
+    let app = spawn_app().await;
+    let body = "name=pprog%20rammingg&email=pprog_lez_go%40gmail.com";
+    Mock::given(path("/email"))
+        .and(method("POST"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
+
+    // Act
+    app.post_subscriptions(body.into())
+        .await;
+
+    // Assert
+    // Mock asserts on drop
 }
