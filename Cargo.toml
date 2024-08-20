@@ -54,7 +54,8 @@ features = ["json"]
 version = "0.8.0"
 default-features = false
 features = [
-    "runtime-tokio-rustls", "macros",
+    "runtime-tokio-rustls",
+    "macros",
     "postgres",
     "uuid",
     "chrono",
