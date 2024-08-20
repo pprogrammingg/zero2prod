@@ -51,7 +51,7 @@ features = ["json"]
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
-version = "0.8"
+version = ">=0.8"
 default-features = false
 features = [
     "runtime-tokio-rustls", "macros",
