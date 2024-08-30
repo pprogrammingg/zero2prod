@@ -56,7 +56,7 @@ async fn subscribe_persists_the_new_subscriber() {
 }
 
 #[tokio::test]
-async fn subscribe_returns_a200_for_valid_form_data() {
+async fn subscribe_returns_a_200_with_valid_email_confirmation_for_valid_form_data() {
     // Arrange
     let app = spawn_app().await;
 
@@ -124,7 +124,7 @@ async fn subscribe_returns_a_400_when_name_email_is_invalid() {
     }
 }
 #[tokio::test]
-async fn subscribe_returns_a400_when_data_is_missing() {
+async fn subscribe_returns_a_400_when_data_is_missing() {
     // Arrange
     let app = spawn_app().await;
 
@@ -194,29 +194,8 @@ async fn subscribe_sends_a_confirmation_email_with_a_link() {
         .await
         .unwrap()[0];
 
-    // Parse the body as JSON, starting from raw bytes
-    let body: serde_json::Value = serde_json::from_slice(&email_request.body).unwrap();
-
-    // Extract the link from one of the request fields.
-    let get_link = |s: &str| {
-        let links: Vec<_> = linkify::LinkFinder::new()
-            .links(s)
-            .filter(|l| *l.kind() == linkify::LinkKind::Url)
-            .collect();
-        assert_eq!(links.len(), 1);
-        links[0].as_str().to_owned()
-    };
-    let html_link = get_link(
-        body["HtmlBody"]
-            .as_str()
-            .unwrap(),
-    );
-    let text_link = get_link(
-        body["TextBody"]
-            .as_str()
-            .unwrap(),
-    );
+    let confirmation_links = app.get_confirmation_links(email_request);
 
     // The two links should be identical
-    assert_eq!(html_link, text_link);
+    assert_eq!(confirmation_links.html, confirmation_links.plain_text);
 }

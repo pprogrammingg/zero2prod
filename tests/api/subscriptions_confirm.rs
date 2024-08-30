@@ -1,6 +1,5 @@
 //! tests/api/subscriptions_confirm.rs
 
-use reqwest::Url;
 use wiremock::{
     matchers::{
         method,
@@ -46,45 +45,22 @@ async fn the_link_returned_by_subscribe_returns_a_200_if_called() {
         .received_requests()
         .await
         .unwrap()[0];
-
-    let body: serde_json::Value = serde_json::from_slice(&email_request.body).unwrap();
-
-    // Extract the link from one of the request fields.
-    let get_link = |s: &str| {
-        let links: Vec<_> = linkify::LinkFinder::new()
-            .links(s)
-            .filter(|l| *l.kind() == linkify::LinkKind::Url)
-            .collect();
-
-        assert_eq!(links.len(), 1);
-
-        links[0].as_str().to_owned()
-    };
-
-    let raw_confirmation_link = &get_link(
-        body["HtmlBody"]
-            .as_str()
-            .unwrap(),
-    );
-
-    let mut confirmation_link = Url::parse(raw_confirmation_link).unwrap();
-    assert_eq!(
-        confirmation_link
-            .host_str()
-            .unwrap(),
-        "127.0.0.1"
-    );
-
-    // set the port on the link, since this info is dynamic
-    confirmation_link
-        .set_port(Some(app.port))
-        .unwrap();
+    let confirmation_links = app.get_confirmation_links(email_request);
 
     // Act
-    let response = reqwest::get(confirmation_link)
+    reqwest::get(confirmation_links.html)
         .await
+        .unwrap()
+        .error_for_status()
         .unwrap();
 
     // Assert
-    assert_eq!(response.status().as_u16(), 200);
+    let saved = sqlx::query!("SELECT email, name, status FROM subscriptions",)
+        .fetch_one(&app.db_pool)
+        .await
+        .expect("Failed to fetch saved subscription.");
+
+    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
+    assert_eq!(saved.name, "le guin");
+    assert_eq!(saved.status, "confirmed");
 }

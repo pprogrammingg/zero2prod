@@ -69,6 +69,10 @@ VerifyConnection(String)
 
 # General Software Engineering Patterns
 
+## Database
+
+- Use all or nothing approach using `transactions` to not leave the DB in dirty state
+
 ## Parse, don't validate
 
 - Instead of using validate functions everywhere to return a bool, define a parse pattern that takes user input
