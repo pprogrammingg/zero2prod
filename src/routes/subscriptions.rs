@@ -14,6 +14,7 @@ use sqlx::{
     Postgres,
     Transaction,
 };
+use tracing::info;
 use uuid::Uuid;
 
 use crate::{
@@ -83,6 +84,7 @@ pub async fn subscribe(
     .await
     .is_err()
     {
+        info!("Encountered error while sending confirmation email!!!");
         return HttpResponse::InternalServerError().finish();
     }
     HttpResponse::Ok().finish()
