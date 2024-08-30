@@ -6,3 +6,4 @@ database:
 email_client:
   base_url: "https://api.mailersend.com/v1/"
   sender_email: "info@trial-pxkjn4136xpgz781.mlsender.net"
+  authorization-token: "mlsn.9966aaa7f5b156c45c08e65914dbbb519ee4f6567e5c9f9b1ad2e9755158e8c4"
