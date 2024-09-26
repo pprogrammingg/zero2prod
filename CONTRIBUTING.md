@@ -6,7 +6,7 @@
 
 # Clippy
 
-- Make sure `clippy` is installed: `cargo install clippy`
+- Make sure `clippy` is installed: `rustup component add clippy-preview`
 - Go to
 
 ```
