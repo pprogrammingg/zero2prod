@@ -39,6 +39,17 @@ Then
     Check Set the Reformat code checkbox.
 ```
 
+## Install Nightly Rust
+Nightly Rust is used to format the code in CI. To use it locally and be close to how CI works, need to install it.
+
+Install nightly Rust:
+
+```
+ rustup toolchain install nightly
+```
+
+Note: In Clippy setting above, go to the same `ExternalLinter` settings and select channel at `nightly` to run clippy also via nightly channel
+
 ## Cargo.toml
 
 - keep package names alphabetical
