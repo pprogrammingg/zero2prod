@@ -1,28 +1,12 @@
-use actix_web::{
-    web,
-    HttpResponse,
-};
+use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use rand::{
-    distributions::Alphanumeric,
-    thread_rng,
-    Rng,
-};
-use sqlx::{
-    Executor,
-    PgPool,
-    Postgres,
-    Transaction,
-};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use sqlx::{Executor, PgPool, Postgres, Transaction};
 use tracing::info;
 use uuid::Uuid;
 
 use crate::{
-    domain::{
-        NewSubscriber,
-        SubscriberEmail,
-        SubscriberName,
-    },
+    domain::{NewSubscriber, SubscriberEmail, SubscriberName},
     email_client::EmailClient,
     startup::ApplicationBaseUrl,
 };

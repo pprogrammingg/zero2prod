@@ -1,8 +1,5 @@
 //! src/routes/subscriptions_confirm.rs
-use actix_web::{
-    web,
-    HttpResponse,
-};
+use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 use uuid::Uuid;
 

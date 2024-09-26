@@ -1,25 +1,11 @@
 use once_cell::sync::Lazy;
-use sqlx::{
-    Connection,
-    Executor,
-    PgConnection,
-    PgPool,
-};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use wiremock::MockServer;
 use zero2prod::{
-    configuration::{
-        get_configuration,
-        DatabaseSettings,
-    },
-    startup::{
-        get_connection_pool,
-        Application,
-    },
-    telemetry::{
-        get_subscriber,
-        init_subscriber,
-    },
+    configuration::{get_configuration, DatabaseSettings},
+    startup::{get_connection_pool, Application},
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
