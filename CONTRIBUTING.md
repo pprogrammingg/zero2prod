@@ -10,7 +10,7 @@
 - Go to
 
 ```
-  File -> Settings -> Rust -> External Linters, 
+  File -> Manage IDE Settings -> Settings Sync ... -> Rust -> External Linters, 
   select Clippy & enable "Run external linter on the fly"
 ```
 
