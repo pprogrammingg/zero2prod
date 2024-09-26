@@ -2,7 +2,7 @@
 
 # IDE
 
-- It is recommended to use `Intellij RustRover`
+- It is recommended to use `Intellij RustRover`. The following instructions pertain to RustRover.
 
 # Clippy
 
@@ -29,7 +29,7 @@
 - Enable RustFmt in RustRover
 
 ```
-    File -> Settings -> search for `RustFmt`. Select `Use Rustfmt instead of built-in formatter`.
+    File -> Manage IDE Settings -> Settings Sync ...  -> search for `RustFmt`. Select `Use Rustfmt instead of built-in formatter`.
 ```
 
 Then
