@@ -6,7 +6,7 @@
 
 # Clippy
 
-- Make sure `clippy` is installed: `cargo component install clippy`
+- Make sure `clippy` is installed: `cargo install clippy`
 - Go to
 
 ```
