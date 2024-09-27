@@ -70,17 +70,11 @@ also via nightly channel
   do not simply use `unwrap` on expressions that return `Result<T, E>`. Rather use proper error handling syntax sucha
   as `?`.
 
-- If capturing specific messages from a lower level using, make sure to bubble it up in error types at higher levels.
-  Note: The example below specifically list `thiserror` library usage for errors but it can be applied to similar
-  crates.
-  In the error below the value inside VerifyConnection is not used.
-
 - In `actix_web` foreign errors can be wrapped in a local type as `newType` and then have `ResponseError` trait
-  implemented
-  on them. This way the foreign error type can use `into()` to get converted to `actix_web::Error` type to be propagated
-  up the chain.
+  implemented on them. This way the foreign error type can use `into()` to get converted to `actix_web::Error` type to
+  be propagated up the chain.
 
-- Rust `Error` trait
+- Rust `std::error::Error` trait
 
 ```rust
 pub trait Error: Debug + Display {
@@ -91,10 +85,12 @@ pub trait Error: Debug + Display {
 }
 ```
 
-Returns `Option` of `Trait Object` to keep underlying error type opaque.
-`Error` trait is a good way to standardize erorrs.
+Returns `Option` of `Trait Object` to keep underlying error type opaque. `std::error::Error` trait is a good way to
+standardize erorrs so that components importing your package, can get `Debug`, `Display` amd `source` for free.
 
-- Something to avoid:
+- If capturing specific messages from a lower level using, make sure to bubble it up in error types at higher levels.
+  Note: The example below specifically list `thiserror` library usage for errors but it can be applied to similar
+  crates. In the error below the value inside VerifyConnection is not used.
 
 ```rust
     #[error("connection could not be verified")]
