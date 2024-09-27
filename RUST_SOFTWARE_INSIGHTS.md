@@ -39,7 +39,8 @@ Then
     Check Set the Reformat code checkbox.
 ```
 
-## Install Nightly Rust
+# Install Nightly Rust
+
 Nightly Rust is used to format the code in CI. To use it locally and be close to how CI works, need to install it.
 
 Install nightly Rust:
@@ -48,34 +49,73 @@ Install nightly Rust:
  rustup toolchain install nightly
 ```
 
-Note: In Clippy setting above, go to the same `ExternalLinter` settings and select channel at `nightly` to run clippy also via nightly channel
+Note: In Clippy setting above, go to the same `ExternalLinter` settings and select channel at `nightly` to run clippy
+also via nightly channel
 
-## Cargo.toml
+# Cargo.toml
 
 - keep package names alphabetical
 - Omit patch numbers from dependency versions. Cargo will automatically find the latest patch number.
 
-## Error Handling
+# Error Handling
+
+- Error should help operators debug and troubleshoot. Users can still just receive 500 Internal Server error as
+  they do not have a mental model of the internals; however, in cases such wrong input to the system, they shouldg
+  get a helpful message.
+
+- Errors can be internal (use enum variants, fields, methods to control flow and ultimately end in log/traces)
+  or at the edge at API level (rely on status code and are propagated in response body)
 
 - As a general rule, errors in `main.rs` should panic, however, anywhere else errors must be bubbled up and handled i.e.
   do not simply use `unwrap` on expressions that return `Result<T, E>`. Rather use proper error handling syntax sucha
   as `?`.
 
 - If capturing specific messages from a lower level using, make sure to bubble it up in error types at higher levels.
+  Note: The example below specifically list `thiserror` library usage for errors but it can be applied to similar
+  crates.
+  In the error below the value inside VerifyConnection is not used.
 
-Note: The example below specifically list `thiserror` library usage for errors but it can be applied to similar crates.
-In the error below the value inside VerifyConnection is not used.
+- In `actix_web` foreign errors can be wrapped in a local type as `newType` and then have `ResponseError` trait
+  implemented
+  on them. This way the foreign error type can use `into()` to get converted to `actix_web::Error` type to be propagated
+  up the chain.
+
+- Rust `Error` trait
 
 ```rust
-#[error("connection could not be verified")]
+pub trait Error: Debug + Display {
+    /// The lower-level source of this error, if any.
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+```
+
+Returns `Option` of `Trait Object` to keep underlying error type opaque.
+`Error` trait is a good way to standardize erorrs.
+
+- Something to avoid:
+
+```rust
+    #[error("connection could not be verified")]
 VerifyConnection(String)
 ```
 
 Change to include the error message inside its string variable:
 
 ```rust
-#[error("connection could not be verified: {0}")]
+    #[error("connection could not be verified: {0}")]
 VerifyConnection(String)
+```
+
+# Tests
+
+Sample test to filter out noise and only allow `error` and `info` to show as well as enable `TEST_LOG`.
+
+```bash
+export RUST_LOG="sqlx=error,info"
+export TEST_LOG=true
+cargo t subscribe_fails_if_there_is_a_fatal_database_error | bunyan
 ```
 
 # General Software Engineering Patterns
@@ -148,5 +188,8 @@ As a DeFi user, I want to stake my Hehe token, So that I can accumulate 7% staki
 
 - Do not go too deep on one story, rather iterate by first introducing essential functionalities
   and then adding other things. For example, subscription ability first, then adding fault-tolerant behaviour
+
+
+
 
 
