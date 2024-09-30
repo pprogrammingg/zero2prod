@@ -104,6 +104,32 @@ Change to include the error message inside its string variable:
 VerifyConnection(String)
 ```
 
+- `thiserror` takes a way a lot of boilderplate code via procedural macros:
+    - [#from] : does a `From` conversion from the underlying error type to the top level
+    - [#source] : delegates `Source` method from underlying error
+    - [#transparent]: delegtes `Source` and `Display` from the underlying error type
+
+- `anyhow`
+  anyhow::Error is a wrapper around a dynamic error type. anyhow::Error works a lot like Box<dyn
+  std::error::Error>, but with these differences:
+  • anyhow::Error requires that the error is Send, Sync, and 'static.
+  • anyhow::Error guarantees that a backtrace is available, even if the underlying error type does
+  not provide one.
+  • anyhow::Error is represented as a narrow pointer — exactly one word in size instead of two.
+- anyhow::Error provides the capability to enrich an error with additional context out of the box.
+  like adding descriptive strings (using `.context("describtive error")`)
+  `context` does 2 things:
+  • it converts the error returned by our methods into an `anyhow::Error`;
+  • it enriches it with additional context around the intentions of the caller.
+- `anyhow` or `thiserror`
+  Read chapter 8.4.2 of `Zerto to Prod in Rust`; basically if you do not need so much programmatic
+  handling of various error enums and error is just for operator, then use opaque error using
+  `anyhow` or `eyre`.
+
+- Rule of error handling
+  `errors should be logged when they are handled.`
+-
+
 # Tests
 
 Sample test to filter out noise and only allow `error` and `info` to show as well as enable `TEST_LOG`.
@@ -113,6 +139,13 @@ export RUST_LOG="sqlx=error,info"
 export TEST_LOG=true
 cargo t subscribe_fails_if_there_is_a_fatal_database_error | bunyan
 ```
+
+- Mock
+    - `mount` vs `mount_as_scoped`, the latter returns MockGaurd which has custom drop and gets dropped when test
+      exists, appropriate when mocking only in specifically cases. Such as loxal to a test helper. Expectation is
+      eagerly
+      checked before going being dropped.
+    -
 
 # General Software Engineering Patterns
 
